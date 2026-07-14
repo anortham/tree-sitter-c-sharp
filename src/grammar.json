@@ -7,6 +7,18 @@
       "type": "SEQ",
       "members": [
         {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "shebang_directive"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
           "type": "REPEAT",
           "content": {
             "type": "SYMBOL",
@@ -12372,61 +12384,59 @@
         }
       ]
     },
+    "shebang_directive": {
+      "type": "TOKEN",
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "STRING",
+            "value": "#!"
+          },
+          {
+            "type": "PATTERN",
+            "value": "[^\\r\\n]*"
+          }
+        ]
+      }
+    },
     "file_app_directive": {
       "type": "TOKEN",
       "content": {
-        "type": "CHOICE",
+        "type": "SEQ",
         "members": [
           {
-            "type": "SEQ",
+            "type": "STRING",
+            "value": "#:"
+          },
+          {
+            "type": "CHOICE",
             "members": [
               {
                 "type": "STRING",
-                "value": "#!"
+                "value": "include"
               },
               {
-                "type": "PATTERN",
-                "value": "[^\\r\\n]*"
+                "type": "STRING",
+                "value": "package"
+              },
+              {
+                "type": "STRING",
+                "value": "project"
+              },
+              {
+                "type": "STRING",
+                "value": "property"
+              },
+              {
+                "type": "STRING",
+                "value": "sdk"
               }
             ]
           },
           {
-            "type": "SEQ",
-            "members": [
-              {
-                "type": "STRING",
-                "value": "#:"
-              },
-              {
-                "type": "CHOICE",
-                "members": [
-                  {
-                    "type": "STRING",
-                    "value": "include"
-                  },
-                  {
-                    "type": "STRING",
-                    "value": "package"
-                  },
-                  {
-                    "type": "STRING",
-                    "value": "project"
-                  },
-                  {
-                    "type": "STRING",
-                    "value": "property"
-                  },
-                  {
-                    "type": "STRING",
-                    "value": "sdk"
-                  }
-                ]
-              },
-              {
-                "type": "PATTERN",
-                "value": "[ \\t]+[^ \\t\\r\\n][^\\r\\n]*"
-              }
-            ]
+            "type": "PATTERN",
+            "value": "[ \\t]+[^ \\t\\r\\n][^\\r\\n]*"
           }
         ]
       }

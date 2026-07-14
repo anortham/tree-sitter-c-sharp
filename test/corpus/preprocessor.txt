@@ -217,7 +217,7 @@ Shebang directive
 --------------------------------------------------------------------------------
 
 (compilation_unit
-  (file_app_directive))
+  (shebang_directive))
 
 ================================================================================
 File application directives
@@ -233,12 +233,26 @@ File application directives
 --------------------------------------------------------------------------------
 
 (compilation_unit
-  (file_app_directive)
+  (shebang_directive)
   (file_app_directive)
   (file_app_directive)
   (file_app_directive)
   (file_app_directive)
   (file_app_directive))
+
+================================================================================
+Shebang after file application directive remains diagnostic
+================================================================================
+
+#:sdk Microsoft.NET.Sdk.Web
+#!/usr/bin/env dotnet
+
+--------------------------------------------------------------------------------
+
+(compilation_unit
+  (file_app_directive)
+  (ERROR
+    (shebang_directive)))
 
 ================================================================================
 File application directives with CRLF boundaries

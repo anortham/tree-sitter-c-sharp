@@ -1768,6 +1768,10 @@
           "named": true
         },
         {
+          "type": "shebang_directive",
+          "named": true
+        },
+        {
           "type": "type_declaration",
           "named": true
         },
@@ -7274,6 +7278,10 @@
   {
     "type": "set",
     "named": false
+  },
+  {
+    "type": "shebang_directive",
+    "named": true
   },
   {
     "type": "sizeof",

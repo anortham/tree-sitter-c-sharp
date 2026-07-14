@@ -179,7 +179,7 @@ export default grammar({
 
   rules: {
     compilation_unit: $ => seq(
-      optional($.shebang_directive),
+      repeat($.file_app_directive),
       repeat($._top_level_item),
     ),
 
@@ -2285,7 +2285,14 @@ export default grammar({
       /\n/,
     ),
 
-    shebang_directive: _ => token(seq('#!', /.*/)),
+    file_app_directive: _ => token(choice(
+      seq('#!', /[^\r\n]*/),
+      seq(
+        '#:',
+        choice('include', 'package', 'project', 'property', 'sdk'),
+        /[ \t]+[^ \t\r\n][^\r\n]*/,
+      ),
+    )),
 
     comment: _ => token(choice(
       seq('//', /[^\n\r]*/),

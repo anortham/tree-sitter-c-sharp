@@ -1744,6 +1744,10 @@
           "named": true
         },
         {
+          "type": "file_app_directive",
+          "named": true
+        },
+        {
           "type": "file_scoped_namespace_declaration",
           "named": true
         },
@@ -1761,10 +1765,6 @@
         },
         {
           "type": "preproc_if",
-          "named": true
-        },
-        {
-          "type": "shebang_directive",
           "named": true
         },
         {
@@ -7020,6 +7020,10 @@
     "named": false
   },
   {
+    "type": "file_app_directive",
+    "named": true
+  },
+  {
     "type": "finally",
     "named": false
   },
@@ -7270,10 +7274,6 @@
   {
     "type": "set",
     "named": false
-  },
-  {
-    "type": "shebang_directive",
-    "named": true
   },
   {
     "type": "sizeof",

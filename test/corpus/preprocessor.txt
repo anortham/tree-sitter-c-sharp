@@ -217,4 +217,62 @@ Shebang directive
 --------------------------------------------------------------------------------
 
 (compilation_unit
-  (shebang_directive))
+  (file_app_directive))
+
+================================================================================
+File application directives
+================================================================================
+
+#!/usr/bin/env dotnet
+#:include "src/shared code.cs"
+#:package "Humanizer@2.14.1"
+#:project "src/My App/My App.csproj"
+#:property TargetFramework=net10.0 RuntimeIdentifier=osx-arm64
+#:sdk Microsoft.NET.Sdk.Web
+
+--------------------------------------------------------------------------------
+
+(compilation_unit
+  (file_app_directive)
+  (file_app_directive)
+  (file_app_directive)
+  (file_app_directive)
+  (file_app_directive)
+  (file_app_directive))
+
+================================================================================
+File application directives with CRLF boundaries
+================================================================================
+
+#:sdk Microsoft.NET.Sdk.Web
+#:property TargetFramework=net10.0
+
+--------------------------------------------------------------------------------
+
+(compilation_unit
+  (file_app_directive)
+  (file_app_directive))
+
+================================================================================
+Malformed file application directive remains diagnostic
+================================================================================
+
+#:sdk
+
+--------------------------------------------------------------------------------
+
+(compilation_unit
+  (ERROR
+    (UNEXPECTED '\n')))
+
+================================================================================
+Malformed preprocessor directive remains diagnostic
+================================================================================
+
+#if
+#endif
+
+--------------------------------------------------------------------------------
+
+(compilation_unit
+  (ERROR))

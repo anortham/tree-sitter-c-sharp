@@ -7,16 +7,11 @@
       "type": "SEQ",
       "members": [
         {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "shebang_directive"
-            },
-            {
-              "type": "BLANK"
-            }
-          ]
+          "type": "REPEAT",
+          "content": {
+            "type": "SYMBOL",
+            "name": "file_app_directive"
+          }
         },
         {
           "type": "REPEAT",
@@ -12377,18 +12372,61 @@
         }
       ]
     },
-    "shebang_directive": {
+    "file_app_directive": {
       "type": "TOKEN",
       "content": {
-        "type": "SEQ",
+        "type": "CHOICE",
         "members": [
           {
-            "type": "STRING",
-            "value": "#!"
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "STRING",
+                "value": "#!"
+              },
+              {
+                "type": "PATTERN",
+                "value": "[^\\r\\n]*"
+              }
+            ]
           },
           {
-            "type": "PATTERN",
-            "value": ".*"
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "STRING",
+                "value": "#:"
+              },
+              {
+                "type": "CHOICE",
+                "members": [
+                  {
+                    "type": "STRING",
+                    "value": "include"
+                  },
+                  {
+                    "type": "STRING",
+                    "value": "package"
+                  },
+                  {
+                    "type": "STRING",
+                    "value": "project"
+                  },
+                  {
+                    "type": "STRING",
+                    "value": "property"
+                  },
+                  {
+                    "type": "STRING",
+                    "value": "sdk"
+                  }
+                ]
+              },
+              {
+                "type": "PATTERN",
+                "value": "[ \\t]+[^ \\t\\r\\n][^\\r\\n]*"
+              }
+            ]
           }
         ]
       }

@@ -306,6 +306,51 @@ static LambdaScanResult scan_lambda_paren_open(TSLexer *lexer) {
 }
 #undef BAIL
 
+static bool scan_verbatim_interpolation_content(
+    TSLexer *lexer,
+    Interpolation *current_interpolation,
+    uint8_t *brace_advanced,
+    bool did_advance
+) {
+    // `brace_advanced` is shared with the opening-brace probe in the caller.
+    lexer->result_symbol = INTERPOLATION_STRING_CONTENT;
+
+    while (lexer->lookahead) {
+        if (lexer->lookahead == '"') {
+            lexer->mark_end(lexer);
+            advance(lexer);
+            if (lexer->lookahead == '"') {
+                advance(lexer);
+                continue;
+            }
+            return did_advance;
+        }
+
+        if (lexer->lookahead == '{') {
+            lexer->mark_end(lexer);
+
+            while (lexer->lookahead == '{' && *brace_advanced < current_interpolation->open_brace_count) {
+                advance(lexer);
+                (*brace_advanced)++;
+            }
+
+            if (*brace_advanced == current_interpolation->open_brace_count &&
+                (*brace_advanced == 0 || lexer->lookahead != '{')) {
+                return did_advance;
+            }
+        }
+
+        if (lexer->lookahead != '{') {
+            *brace_advanced = 0;
+        }
+        advance(lexer);
+        did_advance = true;
+    }
+
+    lexer->mark_end(lexer);
+    return did_advance;
+}
+
 bool tree_sitter_c_sharp_external_scanner_scan(void *payload, TSLexer *lexer, const bool *valid_symbols) {
     Scanner *scanner = (Scanner *)payload;
 
@@ -485,6 +530,22 @@ bool tree_sitter_c_sharp_external_scanner_scan(void *payload, TSLexer *lexer, co
     if (valid_symbols[INTERPOLATION_END_QUOTE] && scanner->interpolation_stack.size > 0) {
         Interpolation *current_interpolation = array_back(&scanner->interpolation_stack);
 
+        // In verbatim strings, a doubled quote pair is content rather than a quote delimiter.
+        // Scan it with the rest of the content so the token stays contiguous.
+        if (is_verbatim(current_interpolation) && valid_symbols[INTERPOLATION_STRING_CONTENT] &&
+            lexer->lookahead == '"') {
+            advance(lexer);
+            if (lexer->lookahead == '"') {
+                advance(lexer);
+                lexer->mark_end(lexer);
+                return scan_verbatim_interpolation_content(lexer, current_interpolation, &brace_advanced, true);
+            }
+
+            lexer->result_symbol = INTERPOLATION_END_QUOTE;
+            (void)array_pop(&scanner->interpolation_stack);
+            return true;
+        }
+
         while (lexer->lookahead == '"') {
             advance(lexer);
             quote_count++;
@@ -538,8 +599,13 @@ bool tree_sitter_c_sharp_external_scanner_scan(void *payload, TSLexer *lexer, co
     }
 
     if (valid_symbols[INTERPOLATION_STRING_CONTENT] && scanner->interpolation_stack.size > 0) {
-        lexer->result_symbol = INTERPOLATION_STRING_CONTENT;
         Interpolation *current_interpolation = array_back(&scanner->interpolation_stack);
+
+        if (is_verbatim(current_interpolation)) {
+            return scan_verbatim_interpolation_content(lexer, current_interpolation, &brace_advanced, did_advance);
+        }
+
+        lexer->result_symbol = INTERPOLATION_STRING_CONTENT;
 
         while (lexer->lookahead) {
             // top-down approach, first see if it's raw
@@ -558,33 +624,6 @@ bool tree_sitter_c_sharp_external_scanner_scan(void *payload, TSLexer *lexer, co
                             return did_advance;
                         }
                     }
-                }
-
-                if (lexer->lookahead == '{') {
-                    lexer->mark_end(lexer);
-
-                    while (lexer->lookahead == '{' && brace_advanced < current_interpolation->open_brace_count) {
-                        advance(lexer);
-                        brace_advanced++;
-                    }
-
-                    if (brace_advanced == current_interpolation->open_brace_count &&
-                        (brace_advanced == 0 || lexer->lookahead != '{')) {
-                        return did_advance;
-                    }
-                }
-            }
-
-            // then verbatim, since it could be verbatim + raw, but run the raw branch first
-            else if (is_verbatim(current_interpolation)) {
-                if (lexer->lookahead == '"') {
-                    lexer->mark_end(lexer);
-                    advance(lexer);
-                    if (lexer->lookahead == '"') {
-                        advance(lexer);
-                        continue;
-                    }
-                    return did_advance;
                 }
 
                 if (lexer->lookahead == '{') {

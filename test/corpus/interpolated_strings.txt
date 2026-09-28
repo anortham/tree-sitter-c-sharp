@@ -3,6 +3,7 @@ Interpolated verbatim string allows doubled quotes around an interpolation (#19)
 ==================
 var s = @$"value=""{v}""";
 ---
+
 (compilation_unit
   (global_statement
     (local_declaration_statement
@@ -18,3 +19,164 @@ var s = @$"value=""{v}""";
               (identifier)
               (interpolation_brace))
             (string_content)))))))
+
+==================
+Both interpolated verbatim string prefix orders preserve interpolations
+==================
+var atDollar = @$"before ""{left}""";
+var dollarAt = $@"before ""{right}""";
+---
+
+(compilation_unit
+  (global_statement
+    (local_declaration_statement
+      (variable_declaration
+        (implicit_type)
+        (variable_declarator
+          (identifier)
+          (interpolated_string_expression
+            (interpolation_start)
+            (string_content)
+            (interpolation
+              (interpolation_brace)
+              (identifier)
+              (interpolation_brace))
+            (string_content))))))
+  (global_statement
+    (local_declaration_statement
+      (variable_declaration
+        (implicit_type)
+        (variable_declarator
+          (identifier)
+          (interpolated_string_expression
+            (interpolation_start)
+            (string_content)
+            (interpolation
+              (interpolation_brace)
+              (identifier)
+              (interpolation_brace))
+            (string_content)))))))
+
+==================
+Interpolated verbatim strings allow quote-only terminal runs
+==================
+var quoteOnly = @$"""";
+var longerQuoteRun = $@"""""";
+---
+
+(compilation_unit
+  (global_statement
+    (local_declaration_statement
+      (variable_declaration
+        (implicit_type)
+        (variable_declarator
+          (identifier)
+          (interpolated_string_expression
+            (interpolation_start)
+            (string_content))))))
+  (global_statement
+    (local_declaration_statement
+      (variable_declaration
+        (implicit_type)
+        (variable_declarator
+          (identifier)
+          (interpolated_string_expression
+            (interpolation_start)
+            (string_content)))))))
+
+==================
+Consecutive interpolations remain separate across doubled quotes
+==================
+var value = @$"{first}""{second}";
+---
+
+(compilation_unit
+  (global_statement
+    (local_declaration_statement
+      (variable_declaration
+        (implicit_type)
+        (variable_declarator
+          (identifier)
+          (interpolated_string_expression
+            (interpolation_start)
+            (interpolation
+              (interpolation_brace)
+              (identifier)
+              (interpolation_brace))
+            (string_content)
+            (interpolation
+              (interpolation_brace)
+              (identifier)
+              (interpolation_brace))))))))
+
+==================
+Escaped braces next to doubled quotes preserve following interpolation
+==================
+var value = @$"{{""quoted""}} {item}";
+---
+
+(compilation_unit
+  (global_statement
+    (local_declaration_statement
+      (variable_declaration
+        (implicit_type)
+        (variable_declarator
+          (identifier)
+          (interpolated_string_expression
+            (interpolation_start)
+            (string_content)
+            (interpolation
+              (interpolation_brace)
+              (identifier)
+              (interpolation_brace))))))))
+
+==================
+Assert.Contains interpolation preserves a following method
+==================
+class ContainsRegression
+{
+    void AssertContains()
+    {
+        Assert.Contains(@$"Expected ""{expected}"" but got ""{actual}""", actual);
+    }
+
+    void FollowingMethod() {}
+}
+---
+
+(compilation_unit
+  (class_declaration
+    (identifier)
+    (declaration_list
+      (method_declaration
+        (predefined_type)
+        (identifier)
+        (parameter_list)
+        (block
+          (expression_statement
+            (invocation_expression
+              (member_access_expression
+                (identifier)
+                (identifier))
+              (argument_list
+                (argument
+                  (interpolated_string_expression
+                    (interpolation_start)
+                    (string_content)
+                    (interpolation
+                      (interpolation_brace)
+                      (identifier)
+                      (interpolation_brace))
+                    (string_content)
+                    (interpolation
+                      (interpolation_brace)
+                      (identifier)
+                      (interpolation_brace))
+                    (string_content)))
+                (argument
+                  (identifier)))))))
+      (method_declaration
+        (predefined_type)
+        (identifier)
+        (parameter_list)
+        (block)))))
